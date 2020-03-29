@@ -1,0 +1,31 @@
+{
+  "name": "irc-covid-bot",
+  "version": "1.0.0",
+  "description": "IRC bot written in NodeJS to retrieve, parse, and push COVID-19 statistics.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "nodemon": "nodemon --ignore data/ --ignore parsers/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/intern0t/irc-covid-bot.git"
+  },
+  "keywords": [
+    "NodeJS",
+    "IRC",
+    "COVID-19",
+    "COVID19",
+    "Bot"
+  ],
+  "author": "Prashant Shrestha",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/intern0t/irc-covid-bot/issues"
+  },
+  "homepage": "https://github.com/intern0t/irc-covid-bot#readme",
+  "dependencies": {
+    "irc": "^0.5.2",
+    "shelljs": "^0.8.3"
+  }
+}
