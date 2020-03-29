@@ -8,7 +8,7 @@
 //  https://node-irc.readthedocs.io/en/latest/API.html#client
 var irc = require('irc');
 var fs = require('fs');
-// var shell = require('shelljs');
+var moment = require('moment');
 
 var jsonFormatted = null;
 
@@ -34,7 +34,7 @@ var timed = setInterval(fetchCovidData, 900000);
  */
 var client = new irc.Client(`${IRC_CONFIGURATIONS.IRC_SERVER}`, `${IRC_CONFIGURATIONS.IRC_NICKNAME}`, {
 	password: `${IRC_CONFIGURATIONS.IRC_PASSWORD}`,
-	channels: [ '#bots' ],
+	channels: IRC_CONFIGURATIONS.IRC_DEFAULT_CHANNELS,
 	autoConnect: false,
 	floodProtection: false,
 	floodProtectionDelay: 1000
@@ -46,6 +46,10 @@ client.addListener('message', function(from, to, message) {
 	if (message && message.length > 0) {
 		let messagesSplitted = message.split(' ');
 		let trailingMessage = '';
+		var updatedDate = '';
+		let sendTo = '';
+
+		sendTo = to.indexOf('#') != -1 ? to : from;
 
 		// Got to trail the messages, to not miss out on combination of words.
 		switch (messagesSplitted[0].toLowerCase()) {
@@ -59,39 +63,64 @@ client.addListener('message', function(from, to, message) {
 					'Total Recovered',
 					'Active Cases',
 					'Critical Cases',
-					'Updated',
-					'First Case'
+					'First Case',
+					'Updated'
 				];
 				trailingMessage = message.substr(6).trim().toLowerCase();
 
 				if (trailingMessage.length < 1) {
 					const searchWorld = jsonFormatted['global'];
+					moment(new Date(jsonFormatted['updated']['countries'])).fromNow() ||
+						jsonFormatted['updated']['countries'];
+
 					client.say(
-						from,
+						sendTo,
 						`Global statistics for COVID-19 - Total Cases: ${searchWorld[
 							'cases'
 						]} | Total Recovered: ${searchWorld['recovered']} | Total Deaths: ${searchWorld[
 							'deaths'
-						]} | Rank #1: ${jsonFormatted['countries'][0][0]}`
+						]} | ACTIVE CASES - Mild Condition: ${jsonFormatted['global']['breakdown']['active'][
+							'mildCondition'
+						]['cases']} (${jsonFormatted['global']['breakdown']['active']['mildCondition'][
+							'percent'
+						]}%), Critical Condition: ${jsonFormatted['global']['breakdown']['active']['criticalCondition'][
+							'cases'
+						]} (${jsonFormatted['global']['breakdown']['active']['criticalCondition'][
+							'percent'
+						]}%) | CLOSED CASES - Outcome: ${jsonFormatted['global']['breakdown']['closed'][
+							'outcome'
+						]}, Recovered: ${jsonFormatted['global']['breakdown']['closed']['recovered'][
+							'cases'
+						]} (${jsonFormatted['global']['breakdown']['closed']['recovered'][
+							'percent'
+						]}%), Deaths: ${jsonFormatted['global']['breakdown']['closed']['deaths'][
+							'cases'
+						]} (${jsonFormatted['global']['breakdown']['closed']['deaths'][
+							'percent'
+						]}%) | Updated: ${updatedDate}`
 					);
 					break;
-				}
+				} else {
+					const searchForCountry = jsonFormatted['countries'].find(
+						(country) => country[0].toLowerCase().indexOf(trailingMessage) != -1
+					);
+					// console.log(searchForCountry);
 
-				const searchForCountry = jsonFormatted['countries'].filter(
-					(country) => country[0].toLowerCase().indexOf(trailingMessage) != -1
-				);
-
-				// Found one.
-				let toReturn = [];
-				if (searchForCountry && searchForCountry.length == 1) {
-					for (var i = 0; i < title.length; i++) {
-						toReturn[i] = `${title[i]}: ${searchForCountry[0][i]}`;
+					// Found one.
+					let toReturn = [];
+					updatedDate =
+						moment(new Date(jsonFormatted['updated']['countries'])).fromNow() ||
+						jsonFormatted['updated']['countries'];
+					if (searchForCountry && searchForCountry.length > 1) {
+						for (var i = 0; i < title.length; i++) {
+							toReturn[i] = `${title[i]}: ${searchForCountry[i]}`;
+						}
+						toReturn[toReturn.length - 1] = 'Updated: ' + updatedDate;
+						toReturn[toReturn.length - 2] =
+							'First Case: ' + searchForCountry[searchForCountry.length - 1];
 					}
-					toReturn[toReturn.length - 2] = 'Updated: ' + jsonFormatted['updated']['countries'];
-					toReturn[toReturn.length - 1] =
-						'First Case: ' + searchForCountry[0][searchForCountry[0].length - 1];
+					client.say(sendTo, toReturn.join(' | '));
 				}
-				client.say(from, toReturn.join(' | '));
 				break;
 			case '!covidstate':
 				trailingMessage = message.substr(11).trim();
@@ -105,17 +134,18 @@ client.addListener('message', function(from, to, message) {
 				const searchForState = jsonFormatted['state'].find(
 					(o) =>
 						o['name'].capitalize(true) === trailingMessage.capitalize(true) ||
-						o['usps'].toLowerCase() === trailingMessage
+						(o['usps'] && o['usps'].toLowerCase() === trailingMessage)
 				);
 
+				updatedDate = moment(jsonFormatted['updated']['state']).fromNow();
 				if (searchForState) {
 					client.say(
-						from,
+						sendTo,
 						`State: ${searchForState['name']} (${searchForState['usps']}) | Cases: ${searchForState[
 							'cases'
 						]} | Deaths: ${searchForState['deaths']} | Deaths per Cases: ${searchForState[
 							'deathspercases'
-						]} | Updated: ${jsonFormatted['updated']['state']}`
+						]} | Updated: ${updatedDate}`
 					);
 				}
 				break;

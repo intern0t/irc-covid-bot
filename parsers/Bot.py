@@ -1,6 +1,7 @@
 import socket, threading, json, requests
 from bs4 import BeautifulSoup
 from datetime import datetime
+from time import sleep
 from timeit import default_timer as timer
 from covid import *
 
@@ -73,7 +74,15 @@ def main():
     t = threading.Thread(target=getCovidInfo)
     THREADS.append(t)
     t.start()
+
+# Run the first function call.
 main()
+# Start threading to run main() in 15 minutes interval.
+
+while not sleep(15 * 60):
+    main()
+# t = threading.Timer(15 * 60, getCovidInfo)
+# t.start()
 
 # Wrapping up all the threads.
 for thread in THREADS:

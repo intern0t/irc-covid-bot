@@ -26,6 +26,7 @@
   "homepage": "https://github.com/intern0t/irc-covid-bot#readme",
   "dependencies": {
     "irc": "^0.5.2",
+    "moment": "^2.24.0",
     "shelljs": "^0.8.3"
   }
 }

@@ -90,16 +90,14 @@ def buildDataSet(soup, writeToFile):
                 globalStat['closed']['deaths']['cases'] = _two.text.strip()
                 globalStat['closed']['deaths']['percent'] = _three.text.strip()
     covidData['global']['breakdown'] = globalStat
-    print(globalStat)
-
-    # print(builtStr.replace("Show Graph", ""))
     # print(globalStat)
+    print("Global breakdown statistics done!")
 
     # State data. 
     req = requests.get("https://ix.cnn.io/dailygraphics/graphics/20200306-us-covid19/data.json")
     jsonFormatted = json.loads(req.text)
     covidData['state'] = jsonFormatted['data']
-    covidData['updated']['state'] = jsonFormatted['lastUpdatedStr']
+    covidData['updated']['state'] = jsonFormatted['lastUpdated']
 
     # Write the data to file to conserve the requests made to the site.
     with open(writeToFile, 'w') as f:
