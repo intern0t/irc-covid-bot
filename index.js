@@ -70,7 +70,7 @@ client.addListener('message', function(from, to, message) {
 
 				if (trailingMessage.length < 1) {
 					const searchWorld = jsonFormatted['global'];
-					moment(new Date(jsonFormatted['updated']['countries'])).fromNow() ||
+					updatedDate = moment(new Date(jsonFormatted['updated']['countries'])).fromNow() ||
 						jsonFormatted['updated']['countries'];
 
 					client.say(
@@ -116,8 +116,7 @@ client.addListener('message', function(from, to, message) {
 							toReturn[i] = `${title[i]}: ${searchForCountry[i]}`;
 						}
 						toReturn[toReturn.length - 1] = 'Updated: ' + updatedDate;
-						toReturn[toReturn.length - 2] =
-							'First Case: ' + searchForCountry[searchForCountry.length - 1];
+						toReturn[toReturn.length - 2] = 'First Case: ' + searchForCountry[searchForCountry.length - 1];
 					}
 					client.say(sendTo, toReturn.join(' | '));
 				}
@@ -150,9 +149,11 @@ client.addListener('message', function(from, to, message) {
 				}
 				break;
 			case '!help':
-				client.say(from, 'Two commands are functional so far, !covid <country> and !covid <state>');
+				client.say(sendTo, 'Two commands are functional so far, !covid <country> and !covidstate <state>');
+				break;
 			case '!part':
 				client.disconnect();
+				break;
 		}
 	}
 	console.log(`${from} => ${to} : ${message}`);
